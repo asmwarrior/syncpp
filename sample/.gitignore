@@ -1,0 +1,5 @@
+build
+Debug
+Release
+syngen.cpp
+syngen.h

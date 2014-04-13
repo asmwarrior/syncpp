@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ScriptCPP" default="default">
+
+	<property name="build.version" value="1.0"/>
+
+	<property name="bld-dir" value="build"/>
+	<property name="tmp-dir" value="${bld-dir}/tmp"/>
+	<property name="dst-dir" value="${bld-dir}/dst"/>
+	<property name="dst-name" value="script-cpp-win32-${build.version}"/>
+	<property name="dst-file" value="${dst-dir}/${dst-name}.zip"/>
+	
+    <target name="default" depends="clean,build"/>
+	
+	<target name="clean">
+    	<delete dir="${bld-dir}"/>
+	</target>
+
+	<target name="build">
+		<mkdir dir="${tmp-dir}"/>
+		<mkdir dir="${dst-dir}"/>
+		
+		<echo file="${tmp-dir}/httpserver.cmd">@echo off
+%~dp0script.exe %~dp0httpserver.s %~dp0web
+pause
+</echo>
+
+		<echo file="${tmp-dir}/tests.cmd">@echo off
+%~dp0script.exe %~dp0tests.s
+pause
+</echo>
+
+		<property name="zip-dir" value="${dst-name}"/>
+	
+		<zip destfile="${dst-file}">
+			<zipfileset file="Release/script.exe" prefix="${zip-dir}"/>
+			<zipfileset file="main/httpserver.s" prefix="${zip-dir}"/>
+			<zipfileset file="main/tests.s" prefix="${zip-dir}"/>
+			<zipfileset file="${tmp-dir}/httpserver.cmd" prefix="${zip-dir}"/>
+			<zipfileset file="${tmp-dir}/tests.cmd" prefix="${zip-dir}"/>
+			<zipfileset dir="web/root" prefix="${zip-dir}/web/root"/>
+			<zipfileset dir="web/lib" prefix="${zip-dir}/web/lib"/>
+		</zip>
+	</target>
+
+</project>

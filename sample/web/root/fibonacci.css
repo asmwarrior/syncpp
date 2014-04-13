@@ -1,0 +1,65 @@
+form {
+	font-family:verdana;
+}
+.form_th {
+	font-size:100%;
+	font-weight:normal;
+	text-align:left;
+}
+.form_input {
+	width:100%;
+	border:solid 1px;
+	height:2.2em;
+	border-color:black;
+	font-family:verdana;
+	font-weight:bold;
+}
+.form_hint {
+	text-align:center;
+	color:black;
+	font-size:90%;
+	font-family:verdana;
+}
+.form_submit {
+	width:100%;
+	border:solid 3px;
+	font-size:100%;
+	font-weight:bold;
+	font-family:verdana;
+	border-color:blue;
+	background:blue;
+	height:2.2em;
+	color:white;
+}
+.form_error {
+	color:red;
+	font-weight:bold;
+	text-align:left;
+}
+.nums_table {
+	font-family: arial;
+	border: 4px green solid;
+	border-collapse:separate;
+	border-spacing:0;
+}
+.nums_th {
+	text-align: left;
+	border-bottom: 3px green solid;
+	border-right: 1px green solid;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+	vertical-align: middle;
+	font-style:italic;
+	padding-left:0.5em;
+	padding-right:0.5em;
+}
+.nums_td {
+	border-bottom: 1px green solid;
+	border-right: 1px green solid;
+	text-align: left;
+	vertical-align:middle;
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+	padding-left:0.5em;
+	padding-right:0.5em;
+}

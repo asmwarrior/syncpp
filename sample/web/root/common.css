@@ -1,0 +1,11 @@
+.main_header {
+	border:solid darkorange 0.25em;
+	font-family:verdana;
+	font-size:2em;
+	font-weight:bold;
+	background:darkorange;
+	color:white;
+	padding-top:0.1em;
+	padding-bottom:0.1em;
+	text-align:center;
+}

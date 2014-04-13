@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="action.cpp" />
+    <ClCompile Include="action_factory.cpp" />
+    <ClCompile Include="cmdline.cpp" />
+    <ClCompile Include="codegen.cpp" />
+    <ClCompile Include="codegen_action.cpp" />
+    <ClCompile Include="commons.cpp" />
+    <ClCompile Include="concretelrgen.cpp" />
+    <ClCompile Include="concretescan.cpp" />
+    <ClCompile Include="conversion.cpp" />
+    <ClCompile Include="conversion_builder.cpp" />
+    <ClCompile Include="converter.cpp" />
+    <ClCompile Include="descriptor.cpp" />
+    <ClCompile Include="descriptor_type.cpp" />
+    <ClCompile Include="ebnf.cpp" />
+    <ClCompile Include="ebnf_bld_attrs.cpp" />
+    <ClCompile Include="ebnf_bld_gentype.cpp" />
+    <ClCompile Include="ebnf_bld_name.cpp" />
+    <ClCompile Include="ebnf_bld_recursion.cpp" />
+    <ClCompile Include="ebnf_bld_type.cpp" />
+    <ClCompile Include="ebnf_bld_void.cpp" />
+    <ClCompile Include="ebnf_builder.cpp" />
+    <ClCompile Include="ebnf_extension.cpp" />
+    <ClCompile Include="grm_parser.cpp" />
+    <ClCompile Include="grm_scanner.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="types.cpp" />
+    <ClCompile Include="util_string.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="action.h" />
+    <ClInclude Include="action_factory.h" />
+    <ClInclude Include="action__dec.h" />
+    <ClInclude Include="bnf.h" />
+    <ClInclude Include="cmdline.h" />
+    <ClInclude Include="cntptr.h" />
+    <ClInclude Include="codegen.h" />
+    <ClInclude Include="codegen_action.h" />
+    <ClInclude Include="commons.h" />
+    <ClInclude Include="concretelrgen.h" />
+    <ClInclude Include="concretelrgen_res.h" />
+    <ClInclude Include="concretescan.h" />
+    <ClInclude Include="concrete_bnf.h" />
+    <ClInclude Include="concrete_lr.h" />
+    <ClInclude Include="conversion.h" />
+    <ClInclude Include="conversion_builder.h" />
+    <ClInclude Include="conversion__dec.h" />
+    <ClInclude Include="converter.h" />
+    <ClInclude Include="converter_res.h" />
+    <ClInclude Include="converter__dec.h" />
+    <ClInclude Include="descriptor.h" />
+    <ClInclude Include="descriptor_type.h" />
+    <ClInclude Include="ebnf_bld_common.h" />
+    <ClInclude Include="ebnf_bld_property.h" />
+    <ClInclude Include="ebnf_builder.h" />
+    <ClInclude Include="ebnf_builder_res.h" />
+    <ClInclude Include="ebnf_extension__dec.h" />
+    <ClInclude Include="ebnf_extension__def.h" />
+    <ClInclude Include="ebnf_extension__imp.h" />
+    <ClInclude Include="ebnf_visitor__dec.h" />
+    <ClInclude Include="ebnf_visitor__def.h" />
+    <ClInclude Include="ebnf_visitor__imp.h" />
+    <ClInclude Include="ebnf__dec.h" />
+    <ClInclude Include="ebnf__def.h" />
+    <ClInclude Include="ebnf__imp.h" />
+    <ClInclude Include="grm_parser.h" />
+    <ClInclude Include="grm_parser_impl.h" />
+    <ClInclude Include="grm_parser_res.h" />
+    <ClInclude Include="lrtables.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="noncopyable.h" />
+    <ClInclude Include="primitives.h" />
+    <ClInclude Include="raw_bnf.h" />
+    <ClInclude Include="types.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="util_mptr.h" />
+    <ClInclude Include="util_string.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{676BD15F-4C53-4026-B396-15A6DE5AA1AB}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>core</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\rt</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\rt</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,380 @@
+/*
+ * Copyright 2014 Anton Karmanov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+/*
+ * Scripting Language grammar for Syn.
+ */
+
+//
+// Tokens
+//
+
+%type AstBinOp;
+%type AstUnOp;
+%type ModifierType;
+
+%token INTEGER {SynInteger} ;
+%token FLOAT {SynFloat} ;
+%token ID {SynName} ;
+%token STRING {SynString} ;
+%token "" {SynPos} ;
+
+//
+// Script
+//
+
+@Script
+	:	block=Block
+	;
+
+Block
+	:	statements=(Statement)*
+	;
+
+//
+// Statement
+//
+
+Statement
+	:	DeclarationStatement
+	|	ExecutionStatement
+	;
+	
+ExecutionStatement{Statement}
+	:	EmptyStatement
+	|	ExpressionStatement
+	|	IfStatement
+	|	WhileStatement
+	|	ForStatement
+	|	BlockStatement
+	|	ContinueStatement
+	|	BreakStatement
+	|	ReturnStatement
+	|	TryStatement
+	|	ThrowStatement
+	;
+
+EmptyStatement
+	:	pos=";" {EmptyStatement}
+	;
+
+DeclarationStatement
+	:	declaration=Declaration
+	;
+
+ExpressionStatement
+	:	expression=Expression ";"
+	;
+	
+IfStatement
+	:	pos="if" "(" expression=Expression ")" true_statement=ExecutionStatement
+		("else" false_statement=ExecutionStatement)?
+	;
+
+WhileStatement
+	:	pos="while" "(" expression=Expression ")" statement=ExecutionStatement
+	;
+	
+ForStatement{Statement}
+	:	RegularForStatement
+	|	ForEachStatement
+	;
+	
+RegularForStatement
+	:	pos="for" "(" init=(ForInit)? ";" expression=(Expression)? ";"
+		update=(Expression : ",")* ")" statement=ExecutionStatement
+	;
+	
+ForEachStatement
+	:	pos="for" "(" ("var" new_variable=<%true> | new_variable=<%false>) variable=ID ":" expression=Expression ")"
+		statement=ExecutionStatement
+	;
+
+ForInit
+	:	VariableForInit
+	|	ExpressionForInit
+	;
+	
+VariableForInit
+	:	"var" variables=(ForVariableDeclaration : ",")+
+	;
+	
+ForVariableDeclaration
+	:	name=ID "=" expression=Expression
+	;
+	
+ExpressionForInit
+	:	expressions=(Expression : ",")+
+	;
+
+BlockStatement
+	:	pos="{" block=Block "}"
+	;
+
+ContinueStatement
+	:	pos="continue" ";" {ContinueStatement}
+	;
+	
+BreakStatement
+	:	pos="break" ";" {BreakStatement}
+	;
+	
+ReturnStatement
+	:	pos="return" return_value=(Expression)? ";"
+	;
+	
+TryStatement
+	:	pos="try" try_statement=BlockStatement
+		"catch" "(" catch_variable=ID ")" catch_statement=BlockStatement
+		("finally" finally_statement=BlockStatement)?
+	|	pos="try" try_statement=BlockStatement
+		"finally" finally_statement=BlockStatement
+	;
+	
+ThrowStatement
+	:	pos="throw" expression=Expression ";"
+	;
+
+//
+// Declaration
+//
+
+Declaration
+	:	VariableDeclaration
+	|	ConstantDeclaration
+	|	FunctionDeclaration
+	|	ClassDeclaration
+	;
+
+VariableDeclaration
+	:	pos="var" name=ID ("=" expression=Expression)? ";"
+	;
+	
+ConstantDeclaration
+	:	pos="const" name=ID "=" expression=Expression ";"
+	;
+
+FunctionDeclaration
+	:	pos="function" name=ID parameters=FunctionFormalParameters body=FunctionBody
+	;
+
+FunctionFormalParameters
+	:	pos="(" parameters=(ID : ",")* ")"
+	;
+
+FunctionBody
+	:	pos="{" block=Block "}"
+	;
+	
+ClassDeclaration
+	:	pos="class" name=ID body=ClassBody
+	;
+
+ClassBody
+	:	"{" members=(ClassMemberDeclaration)* "}"
+	;
+
+ClassMemberDeclaration
+	:	modifier=AccessModifier declaration=Declaration
+	|	declaration=ConstructorDeclaration
+	;
+
+AccessModifier
+	:	"private" %this={ModifierType}(<ModifierType::PRIVATE>)
+	|	"public" %this={ModifierType}(<ModifierType::PUBLIC>)
+	|	 %this={ModifierType}(<ModifierType::NONE>)
+	;
+
+ConstructorDeclaration{FunctionDeclaration}
+	:	pos="new" parameters=FunctionFormalParameters body=FunctionBody
+	;
+
+//
+// Expression
+//
+
+Expression
+	:	AssignmentExpression
+	;
+	
+AssignmentExpression{Expression}
+	:	ConditionalExpression
+	|	left=TerminalExpression pos="=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::NONE>) {AssignmentExpression}
+	|	left=TerminalExpression pos="+=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::ADD>) {AssignmentExpression}
+	|	left=TerminalExpression pos="-=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::SUB>) {AssignmentExpression}
+	|	left=TerminalExpression pos="*=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::MUL>) {AssignmentExpression}
+	|	left=TerminalExpression pos="/=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::DIV>) {AssignmentExpression}
+	|	left=TerminalExpression pos="%=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::MOD>) {AssignmentExpression}
+	|	left=TerminalExpression pos="&=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::LAND>) {AssignmentExpression}
+	|	left=TerminalExpression pos="|=" right=AssignmentExpression op={AstBinOp}(<AstBinOp::LOR>) {AssignmentExpression}
+	;
+	
+ConditionalExpression{Expression}
+	:	OrExpression
+	|	condition=OrExpression pos="?" true_expression=Expression ":" false_expression=ConditionalExpression
+		{ConditionalExpression}
+	;
+	
+OrExpression{Expression}
+	:	AndExpression
+	|	left=OrExpression pos="||" right=AndExpression op={AstBinOp}(<AstBinOp::LOR>) {RegularBinaryExpression}
+	;
+
+AndExpression{Expression}
+	:	EqExpression
+	|	left=AndExpression pos="&&" right=EqExpression op={AstBinOp}(<AstBinOp::LAND>) {RegularBinaryExpression}
+	;
+
+EqExpression{Expression}
+	:	RelExpression
+	|	left=EqExpression pos="==" right=RelExpression op={AstBinOp}(<AstBinOp::EQ>) {RegularBinaryExpression}
+	|	left=EqExpression pos="!=" right=RelExpression op={AstBinOp}(<AstBinOp::NE>) {RegularBinaryExpression}
+	;
+
+RelExpression{Expression}
+	:	AddExpression
+	|	left=RelExpression pos="<" right=AddExpression op={AstBinOp}(<AstBinOp::LT>) {RegularBinaryExpression}
+	|	left=RelExpression pos=">" right=AddExpression op={AstBinOp}(<AstBinOp::GT>) {RegularBinaryExpression}
+	|	left=RelExpression pos="<=" right=AddExpression op={AstBinOp}(<AstBinOp::LE>) {RegularBinaryExpression}
+	|	left=RelExpression pos=">=" right=AddExpression op={AstBinOp}(<AstBinOp::GE>) {RegularBinaryExpression}
+	;
+
+AddExpression{Expression}
+	:	MulExpression
+	|	left=AddExpression pos="+" right=MulExpression op={AstBinOp}(<AstBinOp::ADD>) {RegularBinaryExpression}
+	|	left=AddExpression pos="-" right=MulExpression op={AstBinOp}(<AstBinOp::SUB>) {RegularBinaryExpression}
+	;
+
+MulExpression{Expression}
+	:	PrefixExpression
+	|	left=MulExpression pos="*" right=PrefixExpression op={AstBinOp}(<AstBinOp::MUL>) {RegularBinaryExpression}
+	|	left=MulExpression pos="/" right=PrefixExpression op={AstBinOp}(<AstBinOp::DIV>) {RegularBinaryExpression}
+	|	left=MulExpression pos="%" right=PrefixExpression op={AstBinOp}(<AstBinOp::MOD>) {RegularBinaryExpression}
+	;
+	
+PrefixExpression{Expression}
+	:	PostfixExpression
+	|	pos="+" expression=PostfixExpression op={AstUnOp}(<AstUnOp::PLUS>) {RegularUnaryExpression}
+	|	pos="-" expression=PostfixExpression op={AstUnOp}(<AstUnOp::MINUS>) {RegularUnaryExpression}
+	|	pos="!" expression=PostfixExpression op={AstUnOp}(<AstUnOp::LNOT>) {RegularUnaryExpression}
+	|	pos="++" expression=PostfixExpression increment=<%true> postfix=<%false> {IncrementDecrementExpression}
+	|	pos="--" expression=PostfixExpression increment=<%false> postfix=<%false> {IncrementDecrementExpression}
+	;
+	
+PostfixExpression{Expression}
+	:	TerminalExpression
+	|	expression=TerminalExpression pos="++" increment=<%true> postfix=<%true> {IncrementDecrementExpression}
+	|	expression=TerminalExpression pos="--" increment=<%false> postfix=<%true> {IncrementDecrementExpression}
+	;
+	
+TerminalExpression{Expression}
+	:	"(" %this=Expression ")"
+	|	MemberExpression
+	|	InvocationExpression
+	|	NewObjectExpression
+	|	NewArrayExpression
+	|	ArrayExpression
+	|	SubscriptExpression
+	|	FunctionExpression
+	|	ClassExpression
+	|	NameExpression
+	|	ThisExpression
+	|	LiteralExpression
+	|	TypeofExpression
+	;
+	
+MemberExpression
+	:	object=TerminalExpression pos="." name=ID
+	;
+	
+InvocationExpression
+	:	function=TerminalExpression pos="(" arguments=(Expression : ",")* ")"
+	;
+	
+NewObjectExpression
+	:	pos="new" type_expr=TypeExpression "(" arguments=(Expression : ",")* ")"
+	;
+	
+TypeExpression{Expression}
+	:	TypeNameExpression
+	|	"(" %this=Expression ")"
+	;
+
+TypeNameExpression{Expression}
+	:	NameExpression
+	|	object=TypeNameExpression pos="." name=ID {MemberExpression}
+	;
+
+NewArrayExpression
+	:	pos="new" "[" length=Expression "]"
+	;
+
+ArrayExpression
+	:	pos="[" expressions=(Expression : ",")* "]"
+	;
+	
+SubscriptExpression
+	:	array=TerminalExpression pos="[" index=Expression "]"
+	;
+
+NameExpression
+	:	name=ID
+	;
+
+ThisExpression
+	:	pos="this"
+	;
+
+FunctionExpression
+	:	parameters=FunctionFormalParameters? body=FunctionBody
+	;
+
+ClassExpression
+	:	pos="class" body=ClassBody
+	;
+
+LiteralExpression{Expression}
+	:	IntegerLiteralExpression
+	|	FloatingPointLiteralExpression
+	|	StringLiteralExpression
+	|	NullExpression
+	|	BooleanLiteralExpression
+	;
+	
+IntegerLiteralExpression
+	:	value=INTEGER
+	;
+	
+FloatingPointLiteralExpression
+	:	value=FLOAT
+	;
+
+StringLiteralExpression
+	:	value=STRING
+	;
+
+NullExpression
+	:	pos="null" {NullExpression}
+	;
+	
+BooleanLiteralExpression
+	:	pos="true" value=<%true>
+	|	pos="false" value=<%false>
+	;
+
+TypeofExpression
+	:	pos="typeof" "(" expression=Expression ")"
+	;

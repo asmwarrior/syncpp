@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="api_collection.cpp" />
+    <ClCompile Include="api_execute.cpp" />
+    <ClCompile Include="api_io.cpp" />
+    <ClCompile Include="api_socket.cpp" />
+    <ClCompile Include="ast_declaration.cpp" />
+    <ClCompile Include="ast_expression.cpp" />
+    <ClCompile Include="ast_script.cpp" />
+    <ClCompile Include="ast_statement.cpp" />
+    <ClCompile Include="ast_type.cpp" />
+    <ClCompile Include="basetype.cpp" />
+    <ClCompile Include="common.cpp" />
+    <ClCompile Include="syngen.cpp" />
+    <ClCompile Include="gc.cpp" />
+    <ClCompile Include="gc_hashmap.cpp" />
+    <ClCompile Include="gc_vector.cpp" />
+    <ClCompile Include="name.cpp" />
+    <ClCompile Include="op.cpp" />
+    <ClCompile Include="platform_file_common.cpp" />
+    <ClCompile Include="platform_file_linux.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="platform_linux.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="platform_socket_common.cpp" />
+    <ClCompile Include="platform_windows.cpp" />
+    <ClCompile Include="platform_file_windows.cpp" />
+    <ClCompile Include="platform_socket_windows.cpp" />
+    <ClCompile Include="sample.cpp" />
+    <ClCompile Include="scanner.cpp" />
+    <ClCompile Include="scope.cpp" />
+    <ClCompile Include="script.cpp" />
+    <ClCompile Include="stacktrace.cpp" />
+    <ClCompile Include="stringex.cpp" />
+    <ClCompile Include="sysclass.cpp" />
+    <ClCompile Include="sysclassbld.cpp" />
+    <ClCompile Include="sysvalue.cpp" />
+    <ClCompile Include="value.cpp" />
+    <ClCompile Include="value_core.cpp" />
+    <ClCompile Include="api.cpp" />
+    <ClCompile Include="api_basic.cpp" />
+    <ClCompile Include="api_file.cpp" />
+    <ClCompile Include="value_util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="api_basic.h" />
+    <ClInclude Include="api_collection.h" />
+    <ClInclude Include="api_io.h" />
+    <ClInclude Include="api__dec.h" />
+    <ClInclude Include="ast.h" />
+    <ClInclude Include="ast_combined.h" />
+    <ClInclude Include="ast_declaration.h" />
+    <ClInclude Include="ast_expression.h" />
+    <ClInclude Include="ast_script.h" />
+    <ClInclude Include="ast_statement.h" />
+    <ClInclude Include="ast_type.h" />
+    <ClInclude Include="ast__dec.h" />
+    <ClInclude Include="basetype.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="syngen.h" />
+    <ClInclude Include="dbllist.h" />
+    <ClInclude Include="gc.h" />
+    <ClInclude Include="gc_hashmap.h" />
+    <ClInclude Include="gc_vector.h" />
+    <ClInclude Include="name.h" />
+    <ClInclude Include="name__dec.h" />
+    <ClInclude Include="noncopyable.h" />
+    <ClInclude Include="op.h" />
+    <ClInclude Include="platform.h" />
+    <ClInclude Include="platform_file.h" />
+    <ClInclude Include="platform_file_common.h" />
+    <ClInclude Include="platform_socket.h" />
+    <ClInclude Include="platform_socket_linux.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="platform_socket_windows.h" />
+    <ClInclude Include="scanner.h" />
+    <ClInclude Include="scope.h" />
+    <ClInclude Include="scope__dec.h" />
+    <ClInclude Include="script.h" />
+    <ClInclude Include="stacktrace.h" />
+    <ClInclude Include="stringex.h" />
+    <ClInclude Include="stringex__dec.h" />
+    <ClInclude Include="sysclass.h" />
+    <ClInclude Include="sysclassbld.h" />
+    <ClInclude Include="sysclassbld__imp.h" />
+    <ClInclude Include="sysclass__dec.h" />
+    <ClInclude Include="sysclass__int.h" />
+    <ClInclude Include="sysvalue.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="value.h" />
+    <ClInclude Include="value_core.h" />
+    <ClInclude Include="api.h" />
+    <ClInclude Include="value_util.h" />
+    <ClInclude Include="value__dec.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="grammar.txt">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\syn\Debug\syn.exe -i ast_combined.h -mm "syn_^" -n syn_script::ast -ng syn_script::syngen -a syn_script::ast::AstAllocator -s grammar.txt</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">syngen.cpp;syngen.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\syn\Debug\syn.exe</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\syn\Debug\syn.exe -i ast_combined.h -mm "syn_^" -n syn_script::ast -ng syn_script::syngen -a syn_script::ast::AstAllocator -s grammar.txt</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">syngen.cpp;syngen.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\syn\Debug\syn.exe</AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1FBE4AEE-669F-437B-BE25-D7C0B187FA6B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>core</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\syn\rt</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>..\..\syn\Debug\rt.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\syn\rt</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>..\..\syn\Release\rt.lib</AdditionalDependencies>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

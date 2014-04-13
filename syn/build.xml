@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="ScriptCPP" default="default">
+
+	<property name="build.version" value="1.0"/>
+
+	<property name="bld-dir" value="build"/>
+	<property name="tmp-dir" value="${bld-dir}/tmp"/>
+	<property name="dst-dir" value="${bld-dir}/dst"/>
+	<property name="dst-name" value="syn-cpp-win32-${build.version}"/>
+	<property name="dst-file" value="${dst-dir}/${dst-name}.zip"/>
+	
+    <target name="default" depends="clean,build"/>
+	
+	<target name="clean">
+    	<delete dir="${bld-dir}"/>
+	</target>
+
+	<target name="build">
+		<mkdir dir="${tmp-dir}"/>
+		<mkdir dir="${dst-dir}"/>
+	
+		<zip destfile="${dst-file}">
+			<zipfileset file="Release/syn.exe" prefix="${dst-name}"/>
+		</zip>
+	</target>
+
+</project>
