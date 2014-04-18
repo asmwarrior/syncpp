@@ -218,11 +218,13 @@ function data_numbers() {
 	doc.end();
 }
 
+function load_file(file_name) { return new sys.File(server.root_dir, file_name).read_text(); }
+
 const data =
 	["html",
 		["head",
-			["link rel='stylesheet' type='text/css' href='common.css'"],
-			["link rel='stylesheet' type='text/css' href='fibonacci.css'"],
+			["style", load_file("common.css")],
+			["style", load_file("fibonacci.css")],
 			["title", "Fibonacci Numbers"]
 		],
 		["body", data_form, ["p"], data_numbers]
