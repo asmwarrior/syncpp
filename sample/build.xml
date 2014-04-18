@@ -20,7 +20,7 @@
 		<mkdir dir="${dst-dir}"/>
 		
 		<echo file="${tmp-dir}/httpserver.cmd">@echo off
-%~dp0script.exe %~dp0httpserver.s %~dp0web
+%~dp0script.exe %~dp0httpserver.s 12345 %~dp0web
 pause
 </echo>
 
@@ -39,6 +39,11 @@ pause
 			<zipfileset file="${tmp-dir}/tests.cmd" prefix="${zip-dir}"/>
 			<zipfileset dir="web/root" prefix="${zip-dir}/web/root"/>
 			<zipfileset dir="web/lib" prefix="${zip-dir}/web/lib"/>
+		</zip>
+		
+		<zip destfile="${bld-dir}/full-${build.version}-src.zip">
+			<zipfileset prefix="syn" dir="../syn" excludes="build/**,**/Release/**,**/Debug/**,*" />
+			<zipfileset prefix="sample" dir="." excludes="build/**,**/Release/**,**/Debug/**,*" />
 		</zip>
 	</target>
 

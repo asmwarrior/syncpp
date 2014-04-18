@@ -16,7 +16,7 @@ Features:
 
 Consider a fragment of a grammar:
 ```Java
-Statement : IfStatement | OtherStatement ;
+@Statement : IfStatement | OtherStatement ;
 IfStatement : "if" "(" expr=Expression ")" tStmt=Statement ("else" fStmt=Statement)? ;
 ```
 

@@ -3,3 +3,6 @@ Debug
 Release
 syngen.cpp
 syngen.h
+*.suo
+*.sdf
+*.opensdf
