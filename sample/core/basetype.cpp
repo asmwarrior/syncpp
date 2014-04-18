@@ -17,6 +17,8 @@
 //Functions for handling script integer and floating-point types.
 
 #include <limits>
+#include <stdexcept>
+#include <string>
 
 #include "basetype.h"
 #include "common.h"
@@ -106,4 +108,22 @@ ss::ScriptIntegerType ss::size_to_scriptint_ex(std::size_t s) {
 ss::ScriptIntegerType ss::ulonglong_to_scriptint_opt(unsigned long long v) {
 	if (v < SIGN_MASK) return v;
 	return int_to_scriptint(-1);
+}
+
+bool ss::str_to_int(const std::string& str, ScriptIntegerType& result, int base) {
+	try {
+		result = std::stoll(str, nullptr, base);
+		return true;
+	} catch (const std::logic_error&) {
+		return false;
+	}
+}
+
+bool ss::str_to_float(const std::string& str, ScriptFloatType& result) {
+	try {
+		result = std::stod(str);
+		return true;
+	} catch (const std::logic_error&) {
+		return false;
+	}
 }

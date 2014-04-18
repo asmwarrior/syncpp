@@ -248,13 +248,12 @@ void ss::InternalScanner::scan_multiline_comment() {
 	while (!m_eof) {
 		char c = m_curch;
 		nextch();
-		if (c == '*' && !m_eof && m_curch == '/') {
-			nextch();
-			break;
-		}
+		if (c == '*' && !m_eof && m_curch == '/') break;
 	}
 
 	if (m_eof) throw syn::SynLexicalError();
+
+	nextch();
 }
 
 ss::syngen::Token ss::InternalScanner::scan_number(TokenValue& token_value) {
@@ -296,11 +295,13 @@ ss::syngen::Token ss::InternalScanner::scan_number_dec(TokenValue& token_value) 
 	syngen::Token token;
 	if (floating_point) {
 		token = Tokens::T_FLOAT;
-		ScriptFloatType v = std::stod(m_buffer);
+		ScriptFloatType v;
+		if (!str_to_float(m_buffer, v)) throw syn::SynLexicalError();
 		token_value.v_SynFloat = gc::create<ast::AstFloat>(text_pos, v);
 	} else {
 		token = Tokens::T_INTEGER;
-		ScriptIntegerType v = std::stol(m_buffer);
+		ScriptIntegerType v;
+		if (!str_to_int(m_buffer, v)) throw syn::SynLexicalError();
 		token_value.v_SynInteger = gc::create<ast::AstInteger>(text_pos, v);
 	}
 
@@ -316,7 +317,8 @@ ss::syngen::Token ss::InternalScanner::scan_number_hex(TokenValue& token_value) 
 
 	copy_to_buffer(start, m_cur);
 	gc::Local<ss::TextPos> text_pos = gc::create<ss::TextPos>(m_file_name, m_start_pos.m_row, m_start_pos.m_col);
-	ScriptIntegerType v = std::stol(m_buffer, nullptr, 16);
+	ScriptIntegerType v;
+	if (!str_to_int(m_buffer, v, 16)) throw syn::SynLexicalError();
 	token_value.v_SynInteger = gc::create<ast::AstInteger>(text_pos, v);
 
 	return syngen::Token::T_INTEGER;

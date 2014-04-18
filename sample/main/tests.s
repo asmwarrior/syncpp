@@ -1399,6 +1399,17 @@ var tests = [
 			err = false;
 		} catch (e){}
 		assert(err);
+	},
+	{//Bug: wrong lexical error.
+		sys.execute("foo.s", "/*foo\n*/");
+	},
+	{//Bug: fails on too big decimal integer literal.
+		var s = sys.execute("foo.s", "var x = 10000000000; return \"\" + x;");
+		assertEq("10000000000", s);
+	},
+	{//Bug: fails on too big hexadecimal integer literal.
+		var s = sys.execute("foo.s", "var x = 0x1000000000; return \"\" + x;");
+		assertEq("68719476736", s);
 	}
 ];
 

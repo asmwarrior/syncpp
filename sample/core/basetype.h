@@ -20,6 +20,7 @@
 #define SYNSAMPLE_CORE_BASETYPE_H_INCLUDED
 
 #include <cstddef>
+#include <string>
 
 namespace syn_script {
 
@@ -63,6 +64,9 @@ namespace syn_script {
 	ScriptIntegerType size_to_scriptint_ex(std::size_t s);
 
 	ScriptIntegerType ulonglong_to_scriptint_opt(unsigned long long v);
+
+	bool str_to_int(const std::string& str, ScriptIntegerType& result, int base = 10);
+	bool str_to_float(const std::string& str, ScriptFloatType& result);
 
 }
 
