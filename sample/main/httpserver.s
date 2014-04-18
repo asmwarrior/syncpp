@@ -17,26 +17,19 @@
 //Sample HTTP Server.
 //-------------------------------------------------------------------------------------------------
 
-//Settings.
-const SERVER_PORT = 12345;
-
+//HTTP request size limit. Used to prevent out-of-memory errors in case of very long requests.
 //Requests sent by Firefox, IE, Opera and Safari seem to be 300-400 bytes long.
 const REQUEST_SIZE_LIMIT = 5000;
 
+//Command line.
+const COMMAND_LINE = parse_command_line();
+
 //Paths.
-
-const WEB_DIR = {
-	if (sys.args.length > 1) throw "Too many command line arguments";
-	if (sys.args.length < 1) throw "Web directory path must be specified in the command line";
-	var path = sys.args[0];
-	var dir = new sys.File(path);
-	if (!dir.is_directory()) throw "Web directory not found: " + path;
-	return dir.get_absolute_file();
-}();
-
+const WEB_DIR = COMMAND_LINE.dir;
 const ROOT_DIR = new sys.File(WEB_DIR, "root");
 const LIB_DIR = new sys.File(WEB_DIR, "lib");
 const LOG_FILE = new sys.File(WEB_DIR, "server.log");
+const REQUEST_LOG_FILE = new sys.File(WEB_DIR, "request.log");
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //High-level request processing functions.
@@ -61,6 +54,14 @@ function create_http_namespace(req1, resp1) {
 	})();
 }
 
+//Creates a 'server' namespace object for dynamic pages.
+function create_server_namespace() {
+	return new (class {
+		public const root_dir = ROOT_DIR;
+		function stop() { g_server_stopping = true; }
+	})();
+}
+
 //Handles a dynamic page file.
 function handle_file_s(req, resp, file) {
 	function add_source_file(sources, f) {
@@ -72,6 +73,7 @@ function handle_file_s(req, resp, file) {
 	var scope = new sys.HashMap();
 	scope.put("sys", sys);
 	scope.put("http", create_http_namespace(req, resp));
+	scope.put("server", create_server_namespace());
 
 	var sources = new sys.ArrayList();
 	if (LIB_DIR.is_directory()) {
@@ -184,6 +186,8 @@ function handle_request(req, resp) {
 	//Returns the file which the specified name is mapped to, or the file with that name,
 	//if no mapping is defined.
 	function get_mapped_file(dir, name) {
+		if (name == "." || name == "..") throw "Invalid URL path";
+	
 		var mapping_file = new sys.File(dir, "mapping.txt");
 		if (mapping_file != null) {
 			var mapped_name = get_mapped_name(mapping_file, name);
@@ -340,10 +344,16 @@ class HttpResponse {
 		m_cookies = new sys.HashMap();
 		m_content_type = "text/html";
 		m_out = null;
+
+		add_header("Server", "TinyServer/1.0");
+	}
+	
+	function is_committed() {
+		return m_out != null;
 	}
 	
 	private function check_not_committed() {
-		if (m_out != null) throw "The response has already been committed!";
+		if (is_committed()) throw "The response has already been committed!";
 	}
 
 	function set_status(code, message) {
@@ -437,34 +447,18 @@ class HttpResponse {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Reads a single HTTP request header from a socket, and adds it into a map.
-function read_request_header(socket, headers) {
-	var k = socket.read_byte();
-	if (k == '\r') k = socket.read_byte();
-	if (k == -1 || k == '\n') return false;
-
-	var buf = new sys.StringBuffer();
-
-	while (k != ':') {
-		if (k == -1 || k == '\r' || k == '\n') throw "Invalid HTTP request header";
-		buf.append_char(k);
-		k = socket.read_byte();
-	}
-
-	k = socket.read_byte();
-	while (k == ' ') k = socket.read_byte();
-
-	var header = buf.to_string();
-
-	buf.clear();
-	while (k != -1 && k != '\n') {
-		if (k != '\r') buf.append_char(k);
-		k = socket.read_byte();
-	}
-
-	var value = buf.to_string();
+function parse_request_header(line, headers) {
+	const len = line.length();
+	var pos = line.index_of(':');
+	if (pos == -1) throw "Invalid HTTP request header (no colon)";
+	if (pos == 0) throw "Invalid HTTP request header (header name is empty)";
+	var header = line.substring(0, pos);
+	
+	++pos;
+	if (pos < len && line[pos] == ' ') ++pos;
+	var value = line.substring(pos);
+	
 	add_to_list_map(headers, header, value);
-
-	return true;
 }
 
 //Parses a URL string. Returns path and parameters substrings.
@@ -546,15 +540,19 @@ function parse_cookies(headers) {
 
 //Reads HTTP request from a socket and returns an HttpRequest object.
 function read_request(socket) {
-	var top_line = read_words(socket);
-	if (top_line.length != 3) throw "Invalid HTTP request line: " + top_line;
+	var lines = read_request_lines(socket);
+	var line_cnt = lines.length;
+	if (line_cnt == 0) throw "Empty HTTP request";
 
-	var method = top_line[0];
-	var url = top_line[1];
-	var http_version = top_line[2];
+	var top_words = split_words(lines[0]);
+	if (top_words.length != 3) throw "Invalid HTTP request line: " + top_words;
+
+	var method = top_words[0];
+	var url = top_words[1];
+	var http_version = top_words[2];
 
 	var headers = new sys.HashMap();
-	while (read_request_header(socket, headers)){}
+	for (var i = 1; i < line_cnt; ++i) parse_request_header(lines[i], headers);
 
 	var cookies = parse_cookies(headers);
 
@@ -592,32 +590,39 @@ function handle_error(socket, e) {
 
 //Handles a single request.
 function process_connection(socket) {
+	//Read and parse the request. If an error occurs, the connection will be closed.
+	var req;
 	var resp;
-
 	try {
-		var req = read_request(socket);
+		req = read_request(socket);
 		log_request(socket, req);
-
 		resp = req.get_response();
-		resp.add_header("Server", "TinyServer/1.0");
+	} catch (e) {
+		log_error(e);
+		return;
+	}
 
+	//Handle the request. An HTTP response will be sent if an error occurs.
+	try {
 		handle_request(req, resp);
 		resp.close();
 	} catch (e) {
 		log_error(e);
-		handle_error(socket, e);
+		if (!resp.is_committed()) handle_error(socket, e);
 	}
 }
 
+var g_server_stopping = false;
+
 //Accepts connections and processes requests.
 function listen() {
-	var ss = new sys.ServerSocket(SERVER_PORT);
+	const port = COMMAND_LINE.port;
+	var ss = new sys.ServerSocket(port);
 	try {
-		log("Listening on port " + SERVER_PORT);
-		for (;;) {
+		log("Listening on port " + port);
+		while (!g_server_stopping) {
 			var s = ss.accept();
 			try {
-				s = new LimitedSocket(s);
 				process_connection(s);
 			} catch (e) {
 				log_error(e);
@@ -630,67 +635,98 @@ function listen() {
 	}
 }
 
-//A wrapper for a socket that limits the size of the request. Used to prevent causing out-of-memory errors
-//by sending too large requests.
-class LimitedSocket {
-	var socket;
-	var size;
-	
-	new(other_socket) {
-		socket = other_socket;
-		size = 0;
-	}
-
-	function read_byte() {
-		var k = socket.read_byte();
-		if (k != -1) increment_size(1);
-		return k;
-	}
-	
-	function read(buffer) {
-		var cnt = socket.read(buffer);
-		if (cnt > 0) increment_size(cnt);
-		return cnt;
-	}
-	
-	private function increment_size(cnt) {
-		var new_size = size + cnt;
-		if (new_size > REQUEST_SIZE_LIMIT) throw "Request is too long";
-		size = new_size;
-	}
-
-	function get_remote_host() { return socket.get_remote_host(); }
-	function get_remote_port() { return socket.get_remote_port(); }
-	function write_byte(b) { socket.write_byte(b); }
-	function write(buffer) { socket.write(buffer); }
-	function close() { socket.close(); }
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //Utility functions.
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Reads a single word from the socket and adds it into a list. A word is terminated by a space, LF or EOF.
-function read_word(socket, buf, list) {
-	buf.clear();
-
-	var k = socket.read_byte();
-	while (k == ' ') k = socket.read_byte();
-
-	while (k != -1 && k != '\n' && k != ' ') {
-		if (k != '\r') buf.append_char(k);
-		k = socket.read_byte();
+//Parses command line arguments, returns a command line object.
+function parse_command_line() {
+	if (sys.args.length < 1) throw "Port and web directory path must be specified in the command line";
+	if (sys.args.length > 2) throw "Too many command line arguments";
+	
+	var port0;
+	try {
+		port0 = sys.str_to_int(sys.args[0]);
+	} catch (e) {
+		throw "Invalid port number: " + e;
 	}
+	
+	var path = sys.args[1];
+	var dir0 = new sys.File(path);
+	if (!dir0.is_directory()) throw "Web directory not found: " + path;
+	dir0 = dir0.get_absolute_file();
+	
+	return new (class {
+		public const port = port0;
+		public const dir = dir0;
+	})();
+}
 
-	if (!buf.is_empty()) list.add(buf.to_string());
-	return k != -1 && k != '\n';
+//Reads HTTP request header lines.
+function read_request_lines(socket) {
+	var list = new sys.ArrayList();
+	var buf = new sys.StringBuffer();
+	var size = 0;
+	
+	for (;;) {
+		var k = socket.read_byte();
+		if (k == -1 || k == '\n') {
+			if (buf.length() == 0) break;
+			
+			var str = buf.to_string();
+			var len = str.length();
+			if (len > REQUEST_SIZE_LIMIT || REQUEST_SIZE_LIMIT - len < size) {
+				throw "Request header is too long";
+			}
+			
+			list.add(str);
+			size += len;
+			
+			if (k == -1) break;
+			buf.clear();
+		} else if (k != '\r') {
+			buf.append_char(k);
+		}
+	}
+	
+	log_request_lines(socket, list);
+
+	return list.to_array();
+}
+
+//Logs the HTTP request header into the %REQUEST_LOG_FILE%.
+function log_request_lines(socket, lines) {
+	var out = REQUEST_LOG_FILE.text_out(true);
+	try {
+		out.print(sys.current_time_str());
+		out.print(" ");
+		out.print(socket.get_remote_host());
+		out.print(":");
+		out.println(socket.get_remote_port());
+		for (var line : lines) out.println(line);
+		out.println();
+	} finally {
+		out.close();
+	}
 }
 
 //Reads a sequence of words from a socket.
-function read_words(socket) {
-	var buf = new sys.StringBuffer();
+function split_words(line) {
 	var words = new sys.ArrayList();
-	while (read_word(socket, buf, words)){}
+	
+	var pos = 0;
+	const len = line.length();
+	for (;;) {
+		var next_pos = line.index_of(' ', pos);
+		if (next_pos == -1) {
+			words.add(line.substring(pos));
+			break;
+		}
+		
+		words.add(line.substring(pos, next_pos));
+		pos = next_pos + 1;
+	}
+	
 	return words.to_array();
 }
 
