@@ -35,7 +35,7 @@ const REQUEST_LOG_FILE = new sys.File(WEB_DIR, "request.log");
 //High-level request processing functions.
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-//Handles an HTML file. Writes the file contents to the response as HTML.
+//Writes the contents of the specified file to the response.
 function handle_file_plain(req, resp, file, content_type) {
 	resp.set_content_type(content_type);
 	var data = file.read_bytes();
@@ -295,7 +295,7 @@ class HttpRequest {
 		var s = get_session_opt();
 		if (s != null) return s;
 
-		var session_id = "" + (g_session_id_sequence++); //TODO Synchronize access.
+		var session_id = "" + (g_session_id_sequence++);
 		var session_global = new HttpSessionGlobal(session_id);
 		g_sessions_map.put(session_id, session_global);
 		m_session = new HttpSession(session_global, this, m_response);
@@ -379,7 +379,6 @@ class HttpResponse {
 
 	function remove_cookie(name) {
 		check_not_committed();
-		//TODO Remove existing cookie.
 		m_cookies.put(name, "; expires=Thu, 01 Jan 1970 00:00:00 GMT");
 	}
 
@@ -426,7 +425,6 @@ class HttpResponse {
 			commit();
 			m_out = new (class {
 				function write(str) {
-					//TODO Do not call get_bytes().
 					m_socket.write(str.get_bytes());
 				}
 				function write_bytes(bytes) {
@@ -559,8 +557,6 @@ function read_request(socket) {
 	var url_parts = parse_url(url);
 	var path = url_parts[0];
 	var parameters = url_parts[1];
-
-	//TODO Read the body.
 
 	return new HttpRequest(socket, method, url, http_version, headers, path, parameters, cookies);
 }
@@ -758,7 +754,6 @@ function decode_parameter(v) {
 
 //Writes the given string into the socket, adding CR, LF in the end.
 function write_line(socket, s) {
-	//TODO Do not call get_bytes().
 	socket.write(s.get_bytes());
 	socket.write_byte('\r');
 	socket.write_byte('\n');
